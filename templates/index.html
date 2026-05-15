@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deriv Bot Dashboard</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        body { font-family: 'Orbitron', sans-serif; }
+        .glow { box-shadow: 0 0 20px rgba(34, 197, 94, 0.5); }
+        .glow-red { box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-4">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-4xl font-black text-center mb-8 text-green-400">DERIV BOT DASHBOARD</h1>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-gray-800 p-4 rounded-lg glow text-center">
+                <div class="text-gray-400 text-sm">BALANCE</div>
+                <div id="balance" class="text-2xl font-bold text-green-400">$9862.98</div>
+            </div>
+            <div class="bg-gray-800 p-4 rounded-lg text-center">
+                <div class="text-gray-400 text-sm">PEAK BALANCE</div>
+                <div id="peak" class="text-2xl font-bold text-blue-400">$9862.98</div>
+            </div>
+            <div class="bg-gray-800 p-4 rounded-lg text-center">
+                <div class="text-gray-400 text-sm">SESSION P&L</div>
+                <div id="pnl" class="text-2xl font-bold text-yellow-400">$0.00</div>
+            </div>
+            <div class="bg-gray-800 p-4 rounded-lg text-center">
+                <div class="text-gray-400 text-sm">WIN RATE</div>
+                <div id="winrate" class="text-2xl font-bold text-purple-400">0%</div>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 p-6 rounded-lg mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-4">
+                    <button id="startBtn" class="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-lg font-bold">START BOT</button>
+                    <button id="stopBtn" class="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg font-bold">STOP BOT</button>
+                    <div id="status" class="px-4 py-2 rounded-lg bg-gray-700">Status: Stopped</div>
+                </div>
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" id="trailingStop" class="w-5 h-5">
+                    <span>Trailing Stop</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 p-4 rounded-lg">
+            <h2 class="text-xl font-bold mb-4">TRADE HISTORY</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-700">
+                            <th class="text-left p-2">Time</th>
+                            <th class="text-left p-2">Type</th>
+                            <th class="text-left p-2">Stake</th>
+                            <th class="text-left p-2">Status</th>
+                            <th class="text-left p-2">Profit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trades">
+                        <tr><td colspan="5" class="text-center p-4 text-gray-500">No trades yet</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        
+        socket.on('balance_update', (data) => {
+            document.getElementById('balance').textContent = '$' + data.balance.toFixed(2);
+            document.getElementById('peak').textContent = '$' + data.peak.toFixed(2);
+            document.getElementById('pnl').textContent = '$' + data.pnl.toFixed(2);
+            document.getElementById('pnl').className = 'text-2xl font-bold ' + (data.pnl >= 0 ? 'text-green-400' : 'text-red-400');
+            document.getElementById('winrate').textContent = data.winrate + '%';
+        });
+
+        socket.on('trade_update', (data) => {
+            const tbody = document.getElementById('trades');
+            if (data.trades.length === 0) return;
+            tbody.innerHTML = data.trades.reverse().map(t => `
+                <tr class="border-b border-gray-700">
+                    <td class="p-2">${t.time}</td>
+                    <td class="p-2">${t.type}</td>
+                    <td class="p-2">$${t.stake}</td>
+                    <td class="p-2"><span class="px-2 py-1 rounded ${t.status === 'WIN' ? 'bg-green-600' : t.status === 'LOSS' ? 'bg-red-600' : 'bg-yellow-600'}">${t.status}</span></td>
+                    <td class="p-2 ${t.profit >= 0 ? 'text-green-400' : 'text-red-400'}">$${t.profit.toFixed(2)}</td>
+                </tr>
+            `).join('');
+        });
+
+        socket.on('bot_status', (data) => {
+            document.getElementById('status').textContent = 'Status: ' + data.status;
+            document.getElementById('status').className = 'px-4 py-2 rounded-lg ' + (data.status === 'Running' ? 'bg-green-600 glow' : 'bg-gray-700');
+        });
+
+        document.getElementById('startBtn').onclick = () => {
+            socket.emit('start_bot', { trailing_stop: document.getElementById('trailingStop').checked });
+        };
+
+        document.getElementById('stopBtn').onclick = () => {
+            socket.emit('stop_bot');
+        };
+    </script>
+</body>
+</html>
