@@ -1,10 +1,4 @@
-1  flask==3.0.0
-2  flask-socketio==5.3.6
-3  requests==2.31.0
-4  websocket-client==1.7.0
-5  gunicorn==21.2.0
-6  python-socketio==5.10.0
 flask
 gunicorn
 flask-socketio
-gevent7  python-engineio==4.8.2
+gevent
