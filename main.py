@@ -110,7 +110,7 @@ def connect_deriv():
 
     @app.route('/')
 def index():
-    return f"Deriv Bot is Running ✅<br>Balance: {current_balance}<br>Trades: {total_trades}<br>Status: {'Running' if bot_running else 'Stopped'}"
+        return f"Deriv Bot is Running ✅<br>Balance: {current_balance}<br>Trades: {total_trades}<br>Status: {'Running' if bot_running else 'Stopped'}"
 
 @app.route('/health')
 def health():
