@@ -5,3 +5,7 @@ websocket-client==1.7.0
 gunicorn==21.2.0
 python-socketio==5.10.0
 python-engineio==4.8.2
+flask
+gunicorn
+flask-socketio
+gevent
