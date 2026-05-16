@@ -108,11 +108,9 @@ def connect_deriv():
                                 on_open=on_open)
     ws.run_forever()
 
-    @app.route('/')
+@app.route('/')
 def index():
-        return f"Deriv Bot is Running ✅<br>Balance: {current_balance}<br>Trades: {total_trades}<br>Status: {'Running' if bot_running else 'Stopped'}"
-
-@app.route('/health')
+    return "Deriv Bot is Running ✅ Server is Live"
 def health():
     return {"status": "ok", "balance": current_balance}
 
