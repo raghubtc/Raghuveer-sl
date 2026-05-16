@@ -107,10 +107,17 @@ def connect_deriv():
                                 on_close=on_close,
                                 on_open=on_open)
     ws.run_forever()
+# Global variables - upar add karo agar nahi hain
+current_balance = 0.0
+total_trades = 0
+bot_running = False
+trailing_stop_active = False
 
 @app.route('/')
 def index():
     return "Deriv Bot is Running ✅ Server is Live"
+
+@app.route('/health')
 def health():
     return {"status": "ok", "balance": current_balance}
 
@@ -126,20 +133,3 @@ def stop_bot():
     global bot_running
     bot_running = False
     emit('bot_status', {'status': 'Stopped'})
-
-@socketio.on('connect')
-def handle_connect():
-    emit('balance_update', {
-        'balance': current_balance,
-        'peak': peak_balance,
-        'pnl': session_pnl,
-        'total': total_trades,
-        'winrate': round((win_trades/total_trades*100) if total_trades > 0 else 0, 2)
-    })
-
-if __name__ == '__main__':
-    ws_thread = threading.Thread(target=connect_deriv)
-    ws_thread.daemon = True
-    ws_thread.start()
-    port = int(os.environ.get('PORT', 5000))
-    socketio.run(app, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
