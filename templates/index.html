@@ -1,1 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Deriv Bot Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #0f172a; 
+            color: white; 
+            text-align: center; 
+            padding: 20px; 
+            margin: 0;
+        }
+        .card { 
+            background: #1e293b; 
+            border-radius: 12px; 
+            padding: 20px; 
+            margin: 15px auto; 
+            max-width: 400px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        button { 
+            padding: 15px 30px; 
+            margin: 10px; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-weight: bold;
+            cursor: pointer;
+            width: 140px;
+        }
+        .start { background: #22c55e; color: white; }
+        .stop { background: #ef4444; color: white; }
+        .status { font-size: 24px; margin: 10px 0; }
+        .online { color: #22c55e; }
+        .offline { color: #ef4444; }
+        h1 { color: #38bdf8; }
+        .data { font-size: 18px; margin: 8px 0; }
+        .switch { 
+            position: relative; 
+            display: inline-block; 
+            width: 60px; 
+            height: 34px; 
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { 
+            position: absolute; 
+            cursor: pointer; 
+            top: 0; left: 0; right: 0; bottom: 0; 
+            background-color: #475569; 
+            transition: .4s; 
+            border-radius: 34px;
+        }
+        .slider:before { 
+            position: absolute; 
+            content: ""; 
+            height: 26px; width: 26px; 
+            left: 4px; bottom: 4px; 
+            background-color: white; 
+            transition: .4s; 
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #22c55e; }
+        input:checked + .slider:before { transform: translateX(26px); }
+    </style>
+</head>
+<body>
+    <h1>🤖 Deriv Bot Dashboard</h1>
+    
+    <div class="card">
+        <div class="status">Status: <span id="botStatus" class="offline">Stopped</span></div>
+        <div class="data">Balance: $<span id="balance">0.00</span></div>
+        <div class="data">Total Trades: <span id="trades">0</span></div>
+    </div>
 
+    <div class="card">
+        <button class="start" onclick="startBot()">START BOT</button>
+        <button class="stop" onclick="stopBot()">STOP BOT</button>
+    </div>
+
+    <div class="card">
+        <p>Trailing Stop</p>
+        <label class="switch">
+            <input type="checkbox" id="trailingToggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <script>
+        const socket = io();
+        
+        socket.on('connect', () => {
+            console.log('Connected to server');
+        });
+
+        socket.on('bot_status', (data) => {
+            document.getElementById('botStatus').textContent = data.status;
+            document.getElementById('botStatus').className = data.status === 'Running' ? 'online' : 'offline';
+        });
+
+        socket.on('balance_update', (data) => {
+            document.getElementById('balance').textContent = data.balance.toFixed(2);
+            document.getElementById('trades').textContent = data.trades;
+        });
+
+        function startBot() {
+            const trailing = document.getElementById('trailingToggle').checked;
+            socket.emit('start_bot', { trailing_stop: trailing });
+        }
+
+        function stopBot() {
+            socket.emit('stop_bot');
+        }
+    </script>
+</body>
+</html>
