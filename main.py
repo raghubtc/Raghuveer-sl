@@ -2,7 +2,7 @@ import os
 import json
 import time
 import threading
-from flask import Flask, render_template
+from flask import Flask
 from flask_socketio import SocketIO, emit
 import websocket
 import requests
@@ -108,9 +108,9 @@ def connect_deriv():
                                 on_open=on_open)
     ws.run_forever()
 
-@app.route('/')
+    @app.route('/')
 def index():
-    return render_template('index.html')
+    return f"Deriv Bot is Running ✅<br>Balance: {current_balance}<br>Trades: {total_trades}<br>Status: {'Running' if bot_running else 'Stopped'}"
 
 @app.route('/health')
 def health():
