@@ -121,8 +121,7 @@ trailing_stop_active = False
 
 @app.route('/')
 def index():
-    @app.route('/')
-def index():
+    return render_template('index.html')
     return render_template('index.html')
 
 @app.route('/health')
