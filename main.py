@@ -121,7 +121,9 @@ trailing_stop_active = False
 
 @app.route('/')
 def index():
-    return "Deriv Bot is Running ✅ Server is Live"
+    @app.route('/')
+def index():
+    return render_template('index.html')
 
 @app.route('/health')
 def health():
