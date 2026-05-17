@@ -1,11 +1,17 @@
+import os
 from flask import Flask, render_template
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
+import json
 import time
 import threading
-from flask import Flask
-from flask_socketio import SocketIO, emit
 import websocket
 import requests
+
+app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+
+TOKEN = os.environ.get('VIRTUAL_TOKEN', 'doyLiCZePc0QXfq')
+APP_ID = '1089'
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
